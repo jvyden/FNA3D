@@ -26,6 +26,7 @@
 
 #include "FNA3D_Driver.h"
 #include "FNA3D_Tracing.h"
+#include "openxr/openxr.h"
 
 #ifdef USE_SDL3
 #include <SDL3/SDL.h>
@@ -621,6 +622,36 @@ void FNA3D_GetBackbufferSize(
 		return;
 	}
 	device->GetBackbufferSize(device->driverData, w, h);
+}
+
+XrResult FNA3D_CreateXRSwapchain(
+	FNA3D_Device *device,
+	FNA3D_SurfaceFormat format,
+	XrSession session,
+	int32_t width,
+	int32_t height,
+	FNA3D_Texture ***textures,
+	XrSwapchain *swapchain
+) {
+	if (device == NULL)
+	{
+		return XR_ERROR_HANDLE_INVALID;
+	}
+
+	return device->CreateXRSwapchain(device->driverData, format, session, width, height, textures, swapchain);
+}
+
+XrResult FNA3D_CreateXRSession(
+	FNA3D_Device *device,
+	const XrSessionCreateInfo *createInfo,
+	XrSession *session
+) {
+	if (device == NULL)
+	{
+		return XR_ERROR_HANDLE_INVALID;
+	}
+
+	return device->CreateXRSession(device->driverData, createInfo, session);
 }
 
 FNA3D_SurfaceFormat FNA3D_GetBackbufferSurfaceFormat(FNA3D_Device *device)

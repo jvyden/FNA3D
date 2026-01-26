@@ -864,14 +864,20 @@ FNA3DAPI void FNA3D_GetBackbufferSize(
 	int32_t *h
 );
 
-FNA3DAPI void FNA3D_CreateXRSwapchain(
-	FNA3D_Device *driverData,
+FNA3DAPI XrResult FNA3D_CreateXRSwapchain(
+	FNA3D_Device *device,
 	FNA3D_SurfaceFormat format,
 	XrSession session,
 	int32_t width,
 	int32_t height,
 	FNA3D_Texture ***textures,
 	XrSwapchain *swapchain
+);
+
+FNA3DAPI XrResult FNA3D_CreateXRSession(
+	FNA3D_Device *device,
+	const XrSessionCreateInfo *createInfo,
+	XrSession *session
 );
 
 /* Gets the current pixel format of the backbuffer.

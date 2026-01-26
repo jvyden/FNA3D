@@ -24,7 +24,7 @@
  *
  */
 #include "FNA3D.h"
-#include <SDL3/SDL_stdinc.h>
+
 #if FNA3D_DRIVER_SDL
 
 #include <SDL3/SDL.h>
@@ -2816,9 +2816,18 @@ static XrResult SDLGPU_CreateXRSwapchain(
 		textureHandles[i] = textureHandle;
 	}
 
-	textures = ((FNA3D_Texture***)&textureHandles);
+	*textures = ((FNA3D_Texture**)textureHandles);
 
 	return result;
+}
+
+static XrResult SDLGPU_CreateXRSession(
+	FNA3D_Renderer *driverData,
+	const XrSessionCreateInfo *createInfo,
+	XrSession *session
+) {
+	SDLGPU_Renderer* renderer = (SDLGPU_Renderer*)driverData;
+	return SDL_CreateGPUXRSession(renderer->device, createInfo, session);
 }
 #endif
 
@@ -4274,6 +4283,7 @@ static FNA3D_Device* SDLGPU_CreateDevice(
 ) {
 	SDLGPU_Renderer *renderer;
 	SDL_PropertiesID props;
+	SDL_PropertiesID globalProps;
 	SDL_GPUShaderFormat formats;
 	SDL_GPUDevice *device;
 	SDL_GPUSwapchainComposition swapchainComposition;
@@ -4291,6 +4301,7 @@ static FNA3D_Device* SDLGPU_CreateDevice(
 
 
 	formats = MOJOSHADER_sdlGetShaderFormats();
+	globalProps = SDL_GetGlobalProperties();
 	props = SDL_CreateProperties();
 	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, debugMode);
 	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN, SDL_GetHintBoolean("FNA3D_PREFER_LOW_POWER", false));
@@ -4299,6 +4310,7 @@ static FNA3D_Device* SDLGPU_CreateDevice(
 	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, !!(formats & SDL_GPU_SHADERFORMAT_DXIL));
 	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN, !!(formats & SDL_GPU_SHADERFORMAT_MSL));
 	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_METALLIB_BOOLEAN, !!(formats & SDL_GPU_SHADERFORMAT_METALLIB));
+	SDL_CopyProperties(globalProps, props);
 	device = SDL_CreateGPUDeviceWithProperties(props);
 
 	if (device == NULL)

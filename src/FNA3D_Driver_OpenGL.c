@@ -3507,6 +3507,14 @@ static XrResult OPENGL_CreateXRSwapchain(
 ) {
 	return XR_ERROR_FEATURE_UNSUPPORTED;
 }
+
+static XrResult OPENGL_CreateXRSession(
+	FNA3D_Renderer *driverData,
+	const XrSessionCreateInfo *createInfo,
+	XrSession *session
+) {
+	return XR_ERROR_FEATURE_UNSUPPORTED;
+}
 #endif
 
 /* Textures */
