@@ -24,6 +24,7 @@
  *
  */
 #include "FNA3D.h"
+#include "SDL3/SDL_error.h"
 #include "SDL3/SDL_gpu.h"
 #include "SDL3/SDL_properties.h"
 #include "openxr/openxr.h"
@@ -4651,9 +4652,14 @@ static FNA3D_Device* SDLGPU_CreateDevice(
 		renderer->xrInstance = *instance;
 		renderer->xrGetInstanceProcAddr = SDL_OpenXR_GetXrGetInstanceProcAddr();
 
-		XrResult xrResult = renderer->xrGetInstanceProcAddr(*instance, "xrEnumerateSwapchainImages", (PFN_xrVoidFunction*)&renderer->xrEnumerateSwapchainImages);
-		if(XR_FAILED(xrResult)) {
-			FNA3D_LogError("Failed to find xrEnumerateSwapchainImages: %s", xrResult);
+		if(renderer->xrGetInstanceProcAddr) {
+			XrResult xrResult = renderer->xrGetInstanceProcAddr(*instance, "xrEnumerateSwapchainImages", (PFN_xrVoidFunction*)&renderer->xrEnumerateSwapchainImages);
+			if(XR_FAILED(xrResult)) {
+				FNA3D_LogError("Failed to find xrEnumerateSwapchainImages: %s", xrResult);
+			}
+		}
+		else {
+			FNA3D_LogError("Failed to find getInstanceProcAddr: %s", SDL_GetError());
 		}
 	}
 
