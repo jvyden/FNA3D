@@ -4655,11 +4655,11 @@ static FNA3D_Device* SDLGPU_CreateDevice(
 		if(renderer->xrGetInstanceProcAddr) {
 			XrResult xrResult = renderer->xrGetInstanceProcAddr(*instance, "xrEnumerateSwapchainImages", (PFN_xrVoidFunction*)&renderer->xrEnumerateSwapchainImages);
 			if(XR_FAILED(xrResult)) {
-				FNA3D_LogError("Failed to find xrEnumerateSwapchainImages: %s", xrResult);
+				FNA3D_LogWarn("Failed to find xrEnumerateSwapchainImages: %s", xrResult);
 			}
 		}
 		else {
-			FNA3D_LogError("Failed to find getInstanceProcAddr: %s", SDL_GetError());
+			FNA3D_LogWarn("Failed to find getInstanceProcAddr: %s", SDL_GetError());
 		}
 	}
 
