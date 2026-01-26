@@ -3332,6 +3332,20 @@ static int32_t D3D11_GetBackbufferMultiSampleCount(
 	return ((D3D11Renderer*) driverData)->backbuffer->multiSampleCount;
 }
 
+#if FNA3D_OPENXR
+static XrResult D3D11_CreateXRSwapchain(
+	FNA3D_Renderer *driverData,
+	FNA3D_SurfaceFormat format,
+	XrSession session,
+	int32_t width,
+	int32_t height,
+	FNA3D_Texture ***textures,
+	XrSwapchain *swapchain
+) {
+	return XR_ERROR_FEATURE_UNSUPPORTED;
+}
+#endif
+
 /* Textures */
 
 static FNA3D_Texture* D3D11_CreateTexture2D(

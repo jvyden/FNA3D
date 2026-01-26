@@ -23,22 +23,19 @@
  * Ethan "flibitijibibo" Lee <flibitijibibo@flibitijibibo.com>
  *
  */
-
+#include "FNA3D.h"
+#include <SDL3/SDL_stdinc.h>
 #if FNA3D_DRIVER_SDL
-
-#if FNA3D_OPENXR
-#include <openxr/openxr.h>
-#endif
 
 #include <SDL3/SDL.h>
 
-#if FNA3D_OPENXR
-#include <SDL3/SDL_openxr.h>
-#include <SDL3/SDL_vulkan.h>
-#endif
-
 #include "FNA3D_Driver.h"
 #include "FNA3D_PipelineCache.h"
+
+#if FNA3D_OPENXR
+#include <SDL3/SDL_openxr.h>
+// #include <SDL3/SDL_vulkan.h>
+#endif
 
 #define MAX_FRAMES_IN_FLIGHT 3
 #define MAX_UPLOAD_CYCLE_COUNT 4
@@ -2761,6 +2758,69 @@ static int32_t SDLGPU_GetBackbufferMultiSampleCount(
 	SDLGPU_Renderer *renderer = (SDLGPU_Renderer*) driverData;
 	return renderer->readbackBackbufferMultiSampleCount;
 }
+
+#if FNA3D_OPENXR
+static XrResult SDLGPU_CreateXRSwapchain(
+	FNA3D_Renderer *driverData,
+	FNA3D_SurfaceFormat format,
+	XrSession session,
+	int32_t width,
+	int32_t height,
+	FNA3D_Texture ***textures,
+	XrSwapchain *swapchain
+) {
+	XrSwapchainCreateInfo swapchainCreateInfo = { XR_TYPE_SWAPCHAIN_CREATE_INFO };
+	swapchainCreateInfo.usageFlags = XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT | XR_SWAPCHAIN_USAGE_SAMPLED_BIT;
+	swapchainCreateInfo.format = 0; /* Let SDL pick the format */
+    swapchainCreateInfo.sampleCount = 1;
+    swapchainCreateInfo.width = width;
+    swapchainCreateInfo.height = height;
+    swapchainCreateInfo.faceCount = 1;
+    swapchainCreateInfo.arraySize = 1;
+    swapchainCreateInfo.mipCount = 1;
+
+	SDLGPU_Renderer* renderer = (SDLGPU_Renderer*)driverData;
+	SDL_GPUTextureFormat sdlFormat = XNAToSDL_SurfaceFormat[format];
+
+	SDL_GPUTexture** sdlTextures;
+	XrResult result = SDL_CreateGPUXRSwapchain(
+		renderer->device,
+		session,
+		&swapchainCreateInfo,
+		sdlFormat,
+		swapchain,
+		&sdlTextures
+	);
+
+	if(XR_FAILED(result))
+	{
+		return result;
+	}
+
+	int numTextures = 1; // TODO: use xrEnumerateSwapchainImages to get size
+
+	SDLGPU_TextureHandle** textureHandles = SDL_malloc(sizeof(SDLGPU_TextureHandle*) * numTextures);
+	for (int i = 0; i < numTextures; i++) {
+		SDL_GPUTextureCreateInfo info; 
+		info.format = sdlFormat;
+		info.width = width;
+		info.height = height;
+		info.num_levels = 1;
+		info.sample_count = 1; // TODO: maybe need more than just this, good enough for now?
+
+		SDLGPU_TextureHandle* textureHandle = SDL_malloc(sizeof(SDLGPU_TextureHandle));
+		textureHandle->texture = sdlTextures[i];
+		textureHandle->createInfo = info;
+		textureHandle->boundAsRenderTarget = 0;
+
+		textureHandles[i] = textureHandle;
+	}
+
+	textures = ((FNA3D_Texture***)&textureHandles);
+
+	return result;
+}
+#endif
 
 /* Textures */
 

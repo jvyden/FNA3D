@@ -52,6 +52,10 @@
 
 #include <stdint.h>
 
+#if FNA3D_OPENXR
+#include <openxr/openxr.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -858,6 +862,16 @@ FNA3DAPI void FNA3D_GetBackbufferSize(
 	FNA3D_Device *device,
 	int32_t *w,
 	int32_t *h
+);
+
+FNA3DAPI void FNA3D_CreateXRSwapchain(
+	FNA3D_Device *driverData,
+	FNA3D_SurfaceFormat format,
+	XrSession session,
+	int32_t width,
+	int32_t height,
+	FNA3D_Texture ***textures,
+	XrSwapchain *swapchain
 );
 
 /* Gets the current pixel format of the backbuffer.

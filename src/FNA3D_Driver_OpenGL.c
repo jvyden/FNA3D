@@ -3495,6 +3495,20 @@ static int32_t OPENGL_GetBackbufferMultiSampleCount(FNA3D_Renderer *driverData)
 	return renderer->backbuffer->multiSampleCount;
 }
 
+#if FNA3D_OPENXR
+static XrResult OPENGL_CreateXRSwapchain(
+	FNA3D_Renderer *driverData,
+	FNA3D_SurfaceFormat format,
+	XrSession session,
+	int32_t width,
+	int32_t height,
+	FNA3D_Texture ***textures,
+	XrSwapchain *swapchain
+) {
+	return XR_ERROR_FEATURE_UNSUPPORTED;
+}
+#endif
+
 /* Textures */
 
 static inline OpenGLTexture* OPENGL_INTERNAL_CreateTexture(
