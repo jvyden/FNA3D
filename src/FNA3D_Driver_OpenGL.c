@@ -3503,7 +3503,16 @@ static XrResult OPENGL_CreateXRSwapchain(
 	int32_t width,
 	int32_t height,
 	FNA3D_Texture ***textures,
+	void **swapchainHandle,
 	XrSwapchain *swapchain
+) {
+	return XR_ERROR_FEATURE_UNSUPPORTED;
+}
+
+static XrResult OPENGL_DestroyXRSwapchain(
+	FNA3D_Renderer *driverData,
+	XrSwapchain swapchain,
+	void **swapchainHandle
 ) {
 	return XR_ERROR_FEATURE_UNSUPPORTED;
 }

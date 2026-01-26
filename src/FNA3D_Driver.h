@@ -454,7 +454,14 @@ struct FNA3D_Device
 		int32_t width,
 		int32_t height,
 		FNA3D_Texture ***textures,
+		void **swapchainHandle,
 		XrSwapchain *swapchain
+	);
+
+	XrResult (*DestroyXRSwapchain)(
+		FNA3D_Renderer *driverData,
+		XrSwapchain swapchain,
+		void **swapchainHandle
 	);
 
 	XrResult (*CreateXRSession)(
@@ -784,6 +791,7 @@ struct FNA3D_Device
 	ASSIGN_DRIVER_FUNC(GetBackbufferDepthFormat, name) \
 	ASSIGN_DRIVER_FUNC(GetBackbufferMultiSampleCount, name) \
 	ASSIGN_DRIVER_FUNC(CreateXRSwapchain, name) \
+	ASSIGN_DRIVER_FUNC(DestroyXRSwapchain, name) \
 	ASSIGN_DRIVER_FUNC(CreateXRSession, name) \
 	ASSIGN_DRIVER_FUNC(CreateTexture2D, name) \
 	ASSIGN_DRIVER_FUNC(CreateTexture3D, name) \

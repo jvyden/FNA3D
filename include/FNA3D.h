@@ -871,7 +871,14 @@ FNA3DAPI XrResult FNA3D_CreateXRSwapchain(
 	int32_t width,
 	int32_t height,
 	FNA3D_Texture ***textures,
+	void **swapchainHandle,
 	XrSwapchain *swapchain
+);
+
+FNA3DAPI XrResult FNA3D_DestroyXRSwapchain(
+	FNA3D_Device *device,
+	XrSwapchain swapchain,
+	void **swapchainHandle
 );
 
 FNA3DAPI XrResult FNA3D_CreateXRSession(

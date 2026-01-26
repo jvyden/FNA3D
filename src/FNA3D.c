@@ -631,6 +631,7 @@ XrResult FNA3D_CreateXRSwapchain(
 	int32_t width,
 	int32_t height,
 	FNA3D_Texture ***textures,
+	void **swapchainHandle,
 	XrSwapchain *swapchain
 ) {
 	if (device == NULL)
@@ -638,7 +639,20 @@ XrResult FNA3D_CreateXRSwapchain(
 		return XR_ERROR_HANDLE_INVALID;
 	}
 
-	return device->CreateXRSwapchain(device->driverData, format, session, width, height, textures, swapchain);
+	return device->CreateXRSwapchain(device->driverData, format, session, width, height, textures, swapchainHandle, swapchain);
+}
+
+XrResult FNA3D_DestroyXRSwapchain(
+	FNA3D_Device *device,
+	XrSwapchain swapchain,
+	void **swapchainHandle
+) {
+	if (device == NULL)
+	{
+		return XR_ERROR_HANDLE_INVALID;
+	}
+
+	return device->DestroyXRSwapchain(device->driverData, swapchain, swapchainHandle);
 }
 
 XrResult FNA3D_CreateXRSession(

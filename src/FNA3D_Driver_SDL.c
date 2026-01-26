@@ -24,6 +24,9 @@
  *
  */
 #include "FNA3D.h"
+#include "SDL3/SDL_gpu.h"
+#include "SDL3/SDL_properties.h"
+#include "openxr/openxr.h"
 
 #if FNA3D_DRIVER_SDL
 
@@ -656,6 +659,9 @@ typedef struct SDLGPU_Renderer
 	uint8_t supportsD24;
 	uint8_t supportsD24S8;
 
+	XrInstance xrInstance;
+	PFN_xrGetInstanceProcAddr xrGetInstanceProcAddr;
+	PFN_xrEnumerateSwapchainImages xrEnumerateSwapchainImages;
 } SDLGPU_Renderer;
 
 /* Format Conversion */
@@ -2767,6 +2773,7 @@ static XrResult SDLGPU_CreateXRSwapchain(
 	int32_t width,
 	int32_t height,
 	FNA3D_Texture ***textures,
+	void **swapchainHandle,
 	XrSwapchain *swapchain
 ) {
 	XrSwapchainCreateInfo swapchainCreateInfo = { XR_TYPE_SWAPCHAIN_CREATE_INFO };
@@ -2792,12 +2799,19 @@ static XrResult SDLGPU_CreateXRSwapchain(
 		&sdlTextures
 	);
 
+	*swapchainHandle = sdlTextures;
+
 	if(XR_FAILED(result))
 	{
 		return result;
 	}
 
-	int numTextures = 1; // TODO: use xrEnumerateSwapchainImages to get size
+	uint32_t numTextures;
+	result = renderer->xrEnumerateSwapchainImages(*swapchain, 0, &numTextures, NULL);
+	if(XR_FAILED(result))
+	{
+		return result;
+	}
 
 	SDLGPU_TextureHandle** textureHandles = SDL_malloc(sizeof(SDLGPU_TextureHandle*) * numTextures);
 	for (int i = 0; i < numTextures; i++) {
@@ -2819,6 +2833,15 @@ static XrResult SDLGPU_CreateXRSwapchain(
 	*textures = ((FNA3D_Texture**)textureHandles);
 
 	return result;
+}
+
+static XrResult SDLGPU_DestroyXRSwapchain(
+	FNA3D_Renderer *driverData,
+	XrSwapchain swapchain,
+	void **swapchainHandle
+) {
+	SDLGPU_Renderer* renderer = (SDLGPU_Renderer*)driverData;
+	return SDL_DestroyGPUXRSwapchain(renderer->device, swapchain, (SDL_GPUTexture**)swapchainHandle);
 }
 
 static XrResult SDLGPU_CreateXRSession(
@@ -4621,6 +4644,18 @@ static FNA3D_Device* SDLGPU_CreateDevice(
 #if SDL_PLATFORM_GDK
 	SDL_AddEventWatch(SDLGPU_INTERNAL_GDKEventFilter, renderer);
 #endif
+
+	XrInstance *instance = (XrInstance*)SDL_GetPointerProperty(props, SDL_PROP_GPU_DEVICE_CREATE_XR_INSTANCE_POINTER, NULL);
+
+	if(instance) {
+		renderer->xrInstance = *instance;
+		renderer->xrGetInstanceProcAddr = SDL_OpenXR_GetXrGetInstanceProcAddr();
+
+		XrResult xrResult = renderer->xrGetInstanceProcAddr(*instance, "xrEnumerateSwapchainImages", (PFN_xrVoidFunction*)&renderer->xrEnumerateSwapchainImages);
+		if(XR_FAILED(xrResult)) {
+			FNA3D_LogError("Failed to find xrEnumerateSwapchainImages: %s", xrResult);
+		}
+	}
 
 	return result;
 }
