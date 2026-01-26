@@ -26,7 +26,16 @@
 
 #if FNA3D_DRIVER_SDL
 
+#if FNA3D_OPENXR
+#include <openxr/openxr.h>
+#endif
+
 #include <SDL3/SDL.h>
+
+#if FNA3D_OPENXR
+#include <SDL3/SDL_openxr.h>
+#include <SDL3/SDL_vulkan.h>
+#endif
 
 #include "FNA3D_Driver.h"
 #include "FNA3D_PipelineCache.h"

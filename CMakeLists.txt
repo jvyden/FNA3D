@@ -8,12 +8,15 @@ option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(TRACING_SUPPORT "Build with tracing enabled" OFF)
 option(BUILD_SDL3 "Build against SDL 3.0" ON)
 option(MOJOSHADER_STATIC_SPIRVCROSS "Build against statically linked spirvcross" OFF)
+option(OPENXR_SUPPORT "Build with SDL_GPU OpenXR support" ON)
 
 # Version
 SET(LIB_MAJOR_VERSION "0")
 SET(LIB_MINOR_VERSION "25")
 SET(LIB_REVISION "06")
 SET(LIB_VERSION "${LIB_MAJOR_VERSION}.${LIB_MINOR_VERSION}.${LIB_REVISION}")
+
+SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Build Type
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -74,6 +77,9 @@ if(BUILD_SDL3)
 endif()
 if (MOJOSHADER_STATIC_SPIRVCROSS)
 	add_definitions(-DSDL_GPU_SHADERCROSS_STATIC)
+endif()
+if(OPENXR_SUPPORT)
+	add_definitions(-DFNA3D_OPENXR)
 endif()
 
 if(WIN32 OR BUILD_DXVK_NATIVE)
@@ -231,6 +237,13 @@ else()
 			target_link_libraries(FNA3D PUBLIC ${SDL2_LIBRARIES})
 		endif()
 	endif()
+endif()
+
+if(OPENXR_SUPPORT)
+	# Include OpenXR headers from SDL
+	target_include_directories(FNA3D PRIVATE
+    	${CMAKE_CURRENT_SOURCE_DIR}/../SDL/src/video/khronos
+	)
 endif()
 
 # define install directories
